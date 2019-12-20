@@ -309,7 +309,7 @@ func (m *MessageRetriever) attemptDecrypt(ciphertext []byte, pid peer.ID, addr m
 	// Decrypt and unmarshal plaintext
 	plaintext, err := net.Decrypt(m.node.PrivateKey, ciphertext)
 	if err != nil {
-		log.Warning("Unable to decrypt cipher text to plain text from %s: %s", addr.String(), err.Error())
+		log.Warningf("Unable to decrypt cipher text to plain text from %s: %s\n", addr.String(), err.Error())
 		return
 	}
 
@@ -317,36 +317,36 @@ func (m *MessageRetriever) attemptDecrypt(ciphertext []byte, pid peer.ID, addr m
 	env := pb.Envelope{}
 	err = proto.Unmarshal(plaintext, &env)
 	if err != nil {
-		log.Warning("Unable to unmarshal plaintext to encrypted Envelope from %s: %s", addr.String(), err.Error())
+		log.Warningf("Unable to unmarshal plaintext to encrypted Envelope from %s: %s\n", addr.String(), err.Error())
 		return
 	}
 
 	// Validate the signature
 	ser, err := proto.Marshal(env.Message)
 	if err != nil {
-		log.Warning("Unable to serialize the encrypted message from %s: %s", addr.String(), err.Error())
+		log.Warningf("Unable to serialize the encrypted message from %s: %s\n", addr.String(), err.Error())
 		return
 	}
 	pubkey, err := libp2p.UnmarshalPublicKey(env.Pubkey)
 	if err != nil {
-		log.Warning("Unable to unmarshal the public key from %s: %s", addr.String(), err.Error())
+		log.Warningf("Unable to unmarshal the public key from %s: %s\n", addr.String(), err.Error())
 		return
 	}
 
 	valid, err := pubkey.Verify(ser, env.Signature)
 	if err != nil || !valid {
-		log.Warning("Unable to verify message signature from %s: %s", addr.String(), err.Error())
+		log.Warningf("Unable to verify message signature from %s: %s\n", addr.String(), err.Error())
 		return
 	}
 
 	id, err := peer.IDFromPublicKey(pubkey)
 	if err != nil {
-		log.Warning("Unable to get a peer ID from the pubkey from %s: %s", addr.String(), err.Error())
+		log.Warningf("Unable to get a peer ID from the pubkey from %s: %s\n", addr.String(), err.Error())
 		return
 	}
 
 	if m.bm.IsBanned(id) {
-		log.Warning("Received and dropped offline message from banned user: %s ", id.String())
+		log.Warningf("Received and dropped offline message from banned user: %s\n", id.String())
 		return
 	}
 
